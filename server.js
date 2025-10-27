@@ -1,71 +1,70 @@
-// server.js - Starter Express server for Week 2 assignment
+const express = require("express");
+const { v4: uuidv4 } = require("uuid");
+const {
+  requestLogger,
+  authenticateApiKey,
+  errorHandler,
+} = require("./middleware");
+const { router: productRoutes, setProducts } = require("./routes/products");
 
-// Import required modules
-const express = require('express');
-const bodyParser = require('body-parser');
-const { v4: uuidv4 } = require('uuid');
-
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware setup
-app.use(bodyParser.json());
-
-// Sample in-memory products database
 let products = [
   {
-    id: '1',
-    name: 'Laptop',
-    description: 'High-performance laptop with 16GB RAM',
-    price: 1200,
-    category: 'electronics',
-    inStock: true
+    id: "1",
+    name: "SketchPad",
+    description: "Fine quality paper with 50, 140gsm sheets",
+    price: 400,
+    category: "books",
+    inStock: true,
   },
   {
-    id: '2',
-    name: 'Smartphone',
-    description: 'Latest model with 128GB storage',
+    id: "2",
+    name: "Mechanical Pencil",
+    description: "Metallic with a case of free 0.5 hb leds",
     price: 800,
-    category: 'electronics',
-    inStock: true
+    category: "pencils",
+    inStock: false,
   },
   {
-    id: '3',
-    name: 'Coffee Maker',
-    description: 'Programmable coffee maker with timer',
-    price: 50,
-    category: 'kitchen',
-    inStock: false
-  }
+    id: "3",
+    name: "Retractable blade",
+    description: "Has blades that can be discarder",
+    price: 250,
+    category: "tool",
+    inStock: true,
+  },
+  {
+    id: "4",
+    name: "Charcoal",
+    description: "Give the darkest shades of black",
+    price: 180,
+    category: "pencils",
+    inStock: true,
+  },
 ];
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('Welcome to the Product API! Go to /api/products to see all products.');
+setProducts(products);
+
+app.use(express.json());
+
+app.use(requestLogger);
+
+app.use(authenticateApiKey);
+
+app.get("/", (req, res) => {
+  res.send(
+    "Welcome to my FIRST API... Visit /api/products to see all products."
+  );
 });
 
-// TODO: Implement the following routes:
-// GET /api/products - Get all products
-// GET /api/products/:id - Get a specific product
-// POST /api/products - Create a new product
-// PUT /api/products/:id - Update a product
-// DELETE /api/products/:id - Delete a product
+app.use("/api/products", productRoutes);
 
-// Example route implementation for GET /api/products
-app.get('/api/products', (req, res) => {
-  res.json(products);
-});
+app.use(errorHandler);
 
-// TODO: Implement custom middleware for:
-// - Request logging
-// - Authentication
-// - Error handling
-
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// Export the app for testing purposes
-module.exports = app; 
+module.exports = app;
